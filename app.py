@@ -37,18 +37,12 @@ def main() -> None:
     st.dataframe(df.head(50), use_container_width=True)
 
     st.markdown("---")
-    st.subheader("按盘口信息筛选")
+    st.subheader("按盘口信息筛选（整条检索）")
 
-    # 固定使用“盘口.1”这一列进行筛选
-    target_column_name = "盘口.1"
-    if target_column_name not in df.columns:
-        st.error(f"当前工作表中未找到名为「{target_column_name}」的列，请确认列名是否一致。")
-        st.stop()
-
-    keyword = st.text_input("输入实时赔率（支持模糊匹配，例如：0.80、0.95 等）")
+    keyword = st.text_input("输入关键字（在该行任意列中匹配即命中，支持模糊匹配）")
 
     if keyword:
-        mask = df[target_column_name].astype(str).str.contains(keyword, na=False)
+        mask = df.astype(str).apply(lambda row: row.str.contains(keyword, na=False).any(), axis=1)
         filtered = df[mask]
 
         st.write(f"共找到 **{len(filtered)}** 条记录。")
